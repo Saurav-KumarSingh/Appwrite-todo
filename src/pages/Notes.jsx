@@ -1,35 +1,27 @@
-import { useEffect, useState } from "react"
-import { database } from "../appwrite/config"
+import { useEffect, useState } from "react";
+import db from "../appwrite/dbs";
+import Form from "../components/Form";
+import Task from "../components/Task";
+import { Query } from "appwrite";
 
 const Notes = () => {
+  const [notes, setNotes] = useState([]);
 
-    const [notes,setNotes]=useState([])
+  const init = async () => {
+    const response = await db.tasks.list([Query.orderDesc("$createdAt")]);
+    setNotes(response.documents);
+  };
 
-    
+  useEffect(() => {
+    init();
+  }, []);
 
-    const init=async()=>{
-        const response=await database.listDocuments(
-            import.meta.env.VITE_APPWRITE_DATABASE_ID,
-            import.meta.env.VITE_APPWRITE_COLLECTION_TASKS_ID
-        );
-
-        setNotes(response.documents);
-    }
-
-    useEffect(()=>{
-        init();
-    },[]);
   return (
-    <div>
-        {
-            notes.map(note=>(
-                <div key={note.$id}>
-                    {note.body}
-                </div>
-            ))
-        }
+    <div className="flex flex-col justify-center items-center min-h-screen px-4">
+      <Form setNotes={setNotes} />
+      <Task notes={notes} setNotes={setNotes} />
     </div>
-  )
-}
+  );
+};
 
-export default Notes
+export default Notes;
